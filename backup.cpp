@@ -4,8 +4,6 @@
 #include <iomanip>
 using namespace std;
 
-
-"PROJEK KONT"
 struct Service {
     string title;
     string description;
