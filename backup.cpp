@@ -8,15 +8,24 @@ struct Service {
     string title;
     string description;
     int price;
+    string provider;
 };
 
 struct Order {
     string serviceTitle;
     string orderDescription;
     string username;
+    string provider;
     int price;
     bool isCompleted;
     bool isCanceled;
+};
+
+struct User {
+    string username;
+    string password;
+    int balance;
+    bool isFreelancer;
 };
 
 void banner();
@@ -35,16 +44,14 @@ void cancelOrder();
 void completeOrder();
 void registerUser();
 void login();
-struct User {
-    string username;
-    string password;
-    int balance;
-} currentUser;
 
+User* users[100];
 Service* services[100];
 Order* orders[100];
+int userCount = 0;
 int serviceCount = 0;
 int orderCount = 0;
+User* currentUser = nullptr;
 string username, password;
 int choice;
 
@@ -60,7 +67,7 @@ void firstInterface(){
         banner();
         for(int i = 0; i < numItem; ++i){
             if(i == selItem){
-                cout << "\033[35m";
+                cout << "\033[34m";
             }else{
                 cout << "\033[0m";
             }
@@ -144,7 +151,24 @@ void registerUser(){
     cin >> username;
     cout << "Enter password: ";
     cin >> password;
-    currentUser = {username, password, 0};
+    char role;
+    cout << "Are you a freelancer? (y/n): ";
+    cin >> role;
+
+    for (int i = 0; i < userCount; ++i) {
+        if (users[i]->username == username) {
+            cout << "Username already exists.\n";
+            system("pause");
+            return;
+        }
+    }
+
+    User* newUser = new User;
+    newUser->username = username;
+    newUser->password = password;
+    newUser->balance = 0;
+    newUser->isFreelancer = (role == 'y' || role == 'Y');
+    users[userCount++] = newUser;
     cout << "Registration successful.\n";
     system("pause");
 }
@@ -155,12 +179,22 @@ void login(){
     cin >> username;
     cout << "Enter password: ";
     cin >> password;
-    if (username == currentUser.username && password == currentUser.password) {
-        cout << "Login successful.\n";
-        secondInterface();
-    } else {
-        cout << "Invalid credentials.\n";
+    
+    for (int i = 0; i < userCount; ++i) {
+        if (users[i]->username == username && users[i]->password == password) {
+            currentUser = users[i];
+            cout << "Login successful.\n";
+            system("pause");
+            if (currentUser->isFreelancer) {
+                menuFreelancer();
+            } else {
+                menuUser();
+            }
+            return;
+        }
     }
+    
+    cout << "Invalid credentials.\n";
     system("pause");
 }
 void banner(){
@@ -197,11 +231,11 @@ void menuFreelancer() {
             if (i == 0){
                 cout << "view profile\n";
             }else if (i == 1){
-                cout << "view order\n";
+                cout << "view orders\n";
             }else if (i == 2){
                 cout << "add service\n";
             }else if (i == 3){
-                cout << "detele service\n";
+                cout << "delete service\n";
             }else if (i == 4){
                 cout << "complete order\n";
             }else if (i == 5){
@@ -243,7 +277,7 @@ void menuFreelancer() {
 }
 
 void menuUser() {
-    int numItem = 4, selItem = 0;
+    int numItem = 5, selItem = 0;
     while (true) {
         system("cls");
         for(int i = 0; i < numItem; ++i){
@@ -253,12 +287,14 @@ void menuUser() {
                 cout << "\033[0m";
             }
             if (i == 0){
-                cout << "Top-Up\n";
+                cout << "view profile\n";
             }else if (i == 1){
-                cout << "Place Order\n";
+                cout << "display services\n";
             }else if (i == 2){
-                cout << "View Profile\n";
+                cout << "order\n";
             }else if (i == 3){
+                cout << "top up\n";
+            }else if (i == 4){
                 cout << "logout\n";
             }
             if (i == numItem-1){
@@ -275,12 +311,14 @@ void menuUser() {
                 return;
             }else{
                 if(selItem == 0){
-                    topUp();
-                }else if(selItem == 1){
-                    order();
-                }else if(selItem == 2){
                     viewProfile();
+                }else if(selItem == 1){
+                    displayServices();
+                }else if(selItem == 2){
+                    order();
                 }else if(selItem == 3){
+                    topUp();
+                }else if(selItem == 4){
                     secondInterface();
                 }
             }
@@ -290,64 +328,52 @@ void menuUser() {
 
 void topUp() {
     int amount;
-    system("cls");
-    cout << "||======================||\n||        TOP-UP        ||\n||======================||\n";
-    cout << "Enter amount to top-up (100k, 500k, 1jt, 2jt): ";
+    cout << "Enter amount to top up: ";
     cin >> amount;
-    currentUser.balance += amount;
-    cout << "Top-up successful. Current balance: " << currentUser.balance << endl;
+    currentUser->balance += amount;
+    cout << "Top up successful. New balance: " << currentUser->balance << endl;
     system("pause");
 }
 
 void order() {
     displayServices();
-    if (serviceCount == 0) {
-        cout << "No services available.\n";
-        return;
-    }
-    
     int serviceIndex;
-    cout << "Enter the number of the service to order: ";
+    cout << "Enter the index of the service you want to order: ";
     cin >> serviceIndex;
-    
-    if (serviceIndex < 1 || serviceIndex > serviceCount) {
-        cout << "Invalid service number.\n";
+    if (serviceIndex < 0 || serviceIndex >= serviceCount) {
+        cout << "Invalid service index.\n";
+        system("pause");
         return;
     }
 
-    Service* selectedService = services[serviceIndex - 1];
-    cout << "You have selected: " << selectedService->title << "\n";
-    cout << "Enter a description for your order: ";
-    cin.ignore();
+    Service* service = services[serviceIndex];
+    if (currentUser->balance < service->price) {
+        cout << "Insufficient balance.\n";
+        system("pause");
+        return;
+    }
+
     string orderDescription;
+    cout << "Enter order description: ";
+    cin.ignore();
     getline(cin, orderDescription);
-    
-    if (currentUser.balance < selectedService->price) {
-        cout << "Insufficient balance. Order failed.\n";
-        return;
-    }
 
-    currentUser.balance -= selectedService->price;
-    
-    // Record the order
     Order* newOrder = new Order;
-    newOrder->serviceTitle = selectedService->title;
+    newOrder->serviceTitle = service->title;
     newOrder->orderDescription = orderDescription;
-    newOrder->username = currentUser.username;
-    newOrder->price = selectedService->price;
+    newOrder->username = currentUser->username;
+    newOrder->provider = service->provider;
+    newOrder->price = service->price;
     newOrder->isCompleted = false;
     newOrder->isCanceled = false;
     orders[orderCount++] = newOrder;
-    
-    cout << "Order successful. Current balance: " << currentUser.balance << endl;
+
+    currentUser->balance -= service->price;
+    cout << "Order placed successfully.\n";
+    system("pause");
 }
 
 void addService() {
-    if (serviceCount >= 100) {
-        cout << "Service limit reached.\n";
-        return;
-    }
-
     Service* newService = new Service;
     cout << "Enter service title: ";
     cin.ignore();
@@ -356,165 +382,98 @@ void addService() {
     getline(cin, newService->description);
     cout << "Enter service price: ";
     cin >> newService->price;
+    newService->provider = currentUser->username;
     services[serviceCount++] = newService;
-    cout << "Service added: " << newService->title << endl;
+    cout << "Service added successfully.\n";
     system("pause");
 }
 
 void deleteService() {
-    system("cls");
     displayServices();
-    if (serviceCount == 0) {
-        cout << "No services available to delete.\n";
-        system("pause");
-        return;
-    }
-    
     int serviceIndex;
-    cout << "Enter the number of the service to delete: ";
+    cout << "Enter the index of the service you want to delete: ";
     cin >> serviceIndex;
-    
-    if (serviceIndex < 1 || serviceIndex > serviceCount) {
-        cout << "Invalid service number.\n";
+    if (serviceIndex < 0 || serviceIndex >= serviceCount || services[serviceIndex]->provider != currentUser->username) {
+        cout << "Invalid service index.\n";
         system("pause");
         return;
     }
 
-    // Check if the service has any active orders
-    bool hasOrders = false;
-    for (int i = 0; i < orderCount; ++i) {
-        if (orders[i]->serviceTitle == services[serviceIndex - 1]->title && !orders[i]->isCompleted && !orders[i]->isCanceled) {
-            hasOrders = true;
-            break;
-        }
-    }
-    
-    if (hasOrders) {
-        cout << "Cannot delete service. There are active orders for this service.\n";
-        system("pause");
-        return;
-    }
-
-    delete services[serviceIndex - 1];
-
-    for (int i = serviceIndex - 1; i < serviceCount - 1; ++i) {
+    delete services[serviceIndex];
+    for (int i = serviceIndex; i < serviceCount - 1; ++i) {
         services[i] = services[i + 1];
     }
-
-    serviceCount--;
+    --serviceCount;
     cout << "Service deleted successfully.\n";
     system("pause");
 }
 
 void viewProfile() {
-    system("cls");
-    cout <<"||========================||\n||      PROFILE ANDA      ||\n||========================||\n";
-    cout << "Username: " << currentUser.username << "\nBalance: Rp." << currentUser.balance << endl;
+    cout << "Username: " << currentUser->username << endl;
+    cout << "Balance: " << currentUser->balance << endl;
+    cout << "Role: " << (currentUser->isFreelancer ? "Freelancer" : "User") << endl;
     system("pause");
 }
 
 void displayServices() {
-    if (serviceCount == 0) {
-        cout << "No services available.\n";
-        system("pause");
-        return;
-    }
-
+    cout << "Available Services:\n";
     for (int i = 0; i < serviceCount; ++i) {
-        cout << i + 1 << ". " << services[i]->title << " - " << services[i]->description << " - " << services[i]->price << endl;
+        cout << i+1 << ". " << services[i]->title << " by " << services[i]->provider << " - $" << services[i]->price << "\n   " << services[i]->description << endl;
     }
     system("pause");
 }
 
 void viewOrders() {
-    system("cls");
-    if (orderCount == 0) {
-        cout << "No orders available.\n";
-        system("pause");
-        return;
-    }
-
+    cout << "Your Orders:\n";
     for (int i = 0; i < orderCount; ++i) {
-        cout << i + 1 << ". " << orders[i]->serviceTitle << " - " << orders[i]->orderDescription << " by " << orders[i]->username 
-             << " - " << orders[i]->price;
-        if (orders[i]->isCompleted) {
-            cout << " (Completed)";
-        } else if (orders[i]->isCanceled) {
-            cout << " (Canceled)";
+        if (orders[i]->provider == currentUser->username || orders[i]->username == currentUser->username) {
+            cout << i+1 << ". Service: " << orders[i]->serviceTitle << "\n   Description: " << orders[i]->orderDescription << "\n   User: " << orders[i]->username << "\n   Provider: " << orders[i]->provider << "\n   Price: $" << orders[i]->price << "\n   Status: " << (orders[i]->isCompleted ? "Completed" : orders[i]->isCanceled ? "Canceled" : "Pending") << endl;
         }
-        cout << endl;
     }
-}
-
-void cancelOrder() {
-    system("cls");
-    viewOrders();
-    if (orderCount == 0) {
-        cout << "No orders available to cancel.\n";
-        system("pause");
-        return;
-    }
-
-    int orderIndex;
-    cout << "Enter the number of the order to cancel: ";
-    cin >> orderIndex;
-
-    if (orderIndex < 1 || orderIndex > orderCount) {
-        cout << "Invalid order number.\n";
-        system("pause");
-        return;
-    }
-
-    Order* selectedOrder = orders[orderIndex - 1];
-
-    if (selectedOrder->isCompleted) {
-        cout << "Order is already completed and cannot be canceled.\n";
-        system("pause");
-        return;
-    }
-
-    selectedOrder->isCanceled = true;
-
-    // Find the user who placed the order and refund the balance
-    if (selectedOrder->username == currentUser.username) {
-        currentUser.balance += selectedOrder->price;
-    }
-
-    cout << "Order canceled successfully. The customer has been refunded.\n";
     system("pause");
-
 }
-
-void completeOrder() {
-    system("cls");
+void cancelOrder() {
     viewOrders();
-    if (orderCount == 0) {
-        cout << "No orders available to complete.\n";
-        system("pause");
-        return;
-    }
-
     int orderIndex;
-    cout << "Enter the number of the order to complete: ";
+    cout << "Enter the index of the order you want to cancel: ";
     cin >> orderIndex;
-
-    if (orderIndex < 1 || orderIndex > orderCount) {
-        cout << "Invalid order number.\n";
+    if (orderIndex < 0 || orderIndex >= orderCount || orders[orderIndex]->provider != currentUser->username || orders[orderIndex]->isCompleted || orders[orderIndex]->isCanceled) {
+        cout << "Invalid order index.\n";
         system("pause");
         return;
     }
 
-    Order* selectedOrder = orders[orderIndex - 1];
+    orders[orderIndex]->isCanceled = true;
 
-    if (selectedOrder->isCanceled) {
-        cout << "Order is canceled and cannot be completed.\n";
+    // Find the user who placed the order and refund the amount
+    for (int i = 0; i < userCount; ++i) {
+        if (users[i]->username == orders[orderIndex]->username) {
+            users[i]->balance += orders[orderIndex]->price;
+            break;
+        }
+    }
+
+    cout << "Order canceled successfully. Amount refunded to user.\n";
+    system("pause");
+}
+void completeOrder() {
+    viewOrders();
+    int orderIndex;
+    cout << "Enter the index of the order you want to mark as completed: ";
+    cin >> orderIndex;
+    if (orderIndex < 0 || orderIndex >= orderCount || orders[orderIndex]->provider != currentUser->username || orders[orderIndex]->isCompleted || orders[orderIndex]->isCanceled) {
+        cout << "Invalid order index.\n";
         system("pause");
         return;
     }
 
-    selectedOrder->isCompleted = true;
-
-    cout << "Order completed successfully. The customer has been notified.\n";
-
-
+    orders[orderIndex]->isCompleted = true;
+    for (int i = 0; i < userCount; ++i) {
+        if (users[i]->username == orders[orderIndex]->provider) {
+            users[i]->balance += orders[orderIndex]->price;
+            break;
+        }
+    }
+    cout << "Order marked as completed.\n";
+    system("pause");
 }
