@@ -96,17 +96,44 @@ void firstInterface(){
     }
 }
 void secondInterface(){
+    int numItem = 3, selItem = 0;
     while (true) {
         system("cls");
         banner();
-        cout << "1. Freelancer Menu\n2. User Menu\n3. Log-out\nChoice: ";
-        cin >> choice;
-        if (choice == 1) {
-            menuFreelancer();
-        } else if (choice == 2) {
-            menuUser();
-        } else if(choice == 3){
-            firstInterface();
+        for(int i = 0; i < numItem; ++i){
+            if(i == selItem){
+                cout << "\033[34m";
+            }else{
+                cout << "\033[0m";
+            }
+            if (i == 0){
+                cout << "||======================||\n||       FREELANCER     ||\n||======================||\n";
+            }else if (i == 1){
+                cout << "||======================||\n||          USER        ||\n||======================||\n";
+            }else if (i == 2){
+                cout << "||======================||\n||         LOG-OUT      ||\n||======================||\n";
+            }
+            if (i == numItem-1){
+                cout << "\033[0m";
+            }
+        }
+        int key = getch();
+        if(key == 72){
+            selItem = (selItem + numItem - 1) % numItem;
+        }else if(key == 80){
+            selItem = (selItem + 1) % numItem;
+        }else if(key == 13){
+            if(selItem == numItem-1){
+                return;
+            }else{
+                if(selItem == 0){
+                    menuFreelancer();
+                }else if(selItem == 1){
+                   menuUser();
+                }else if(selItem == 2){
+                    firstInterface();
+                }
+            }
         }
     }
 }
