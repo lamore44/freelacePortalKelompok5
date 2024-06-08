@@ -185,51 +185,118 @@ void banner(){
 }
 
 void menuFreelancer() {
-    int choice;
+    int numItem = 7, selItem = 0;
     while (true) {
-        cout << "1. View Profile\n2. View Orders\n3. Add Service\n4. Delete Service\n5. Complete Order\n6. Cancel Order\n7. Logout\nChoice: ";
-        cin >> choice;
-        if (choice == 1) {
-            viewProfile();
-        } else if (choice == 2) {
-            viewOrders();
-        } else if (choice == 3) {
-            addService();
-        } else if (choice == 4) {
-            deleteService();
-        } else if (choice == 5) {
-            completeOrder();
-        } else if (choice == 6) {
-            cancelOrder();
-        } else if (choice == 7) {
-            break;
+        system("cls");
+        for(int i = 0; i < numItem; ++i){
+            if(i == selItem){
+                cout << "=> ";
+            }else{
+                cout << "\033[0m";
+            }
+            if (i == 0){
+                cout << "view profile\n";
+            }else if (i == 1){
+                cout << "view order\n";
+            }else if (i == 2){
+                cout << "add service\n";
+            }else if (i == 3){
+                cout << "detele service\n";
+            }else if (i == 4){
+                cout << "complete order\n";
+            }else if (i == 5){
+                cout << "cancel order\n";
+            }else if (i == 6){
+                cout << "logout\n";
+            }
+            if (i == numItem-1){
+                cout << "";
+            }
+        }
+        int key = getch();
+        if(key == 72){
+            selItem = (selItem + numItem - 1) % numItem;
+        }else if(key == 80){
+            selItem = (selItem + 1) % numItem;
+        }else if(key == 13){
+            if(selItem == numItem-1){
+                return;
+            }else{
+                if(selItem == 0){
+                    viewProfile();
+                }else if(selItem == 1){
+                    viewOrders();
+                }else if(selItem == 2){
+                    addService();
+                }else if(selItem == 3){
+                    deleteService();
+                }else if(selItem == 4){
+                    completeOrder();
+                }else if(selItem == 5){
+                    cancelOrder();
+                }else if(selItem == 6){
+                    secondInterface();
+                }
+            }
         }
     }
 }
 
 void menuUser() {
-    int choice;
+    int numItem = 4, selItem = 0;
     while (true) {
-        cout << "1. Top Up\n2. Place Order\n3. View Profile\n4. Logout\nChoice: ";
-        cin >> choice;
-        if (choice == 1) {
-            topUp();
-        } else if (choice == 2) {
-            order();
-        } else if (choice == 3) {
-            viewProfile();
-        } else if (choice == 4) {
-            break;
+        system("cls");
+        for(int i = 0; i < numItem; ++i){
+            if(i == selItem){
+                cout << "=> ";
+            }else{
+                cout << "\033[0m";
+            }
+            if (i == 0){
+                cout << "Top-Up\n";
+            }else if (i == 1){
+                cout << "Place Order\n";
+            }else if (i == 2){
+                cout << "View Profile\n";
+            }else if (i == 3){
+                cout << "logout\n";
+            }
+            if (i == numItem-1){
+                cout << "";
+            }
+        }
+        int key = getch();
+        if(key == 72){
+            selItem = (selItem + numItem - 1) % numItem;
+        }else if(key == 80){
+            selItem = (selItem + 1) % numItem;
+        }else if(key == 13){
+            if(selItem == numItem-1){
+                return;
+            }else{
+                if(selItem == 0){
+                    topUp();
+                }else if(selItem == 1){
+                    order();
+                }else if(selItem == 2){
+                    viewProfile();
+                }else if(selItem == 3){
+                    secondInterface();
+                }
+            }
         }
     }
 }
 
 void topUp() {
     int amount;
+    system("cls");
+    cout << "||======================||\n||        TOP-UP        ||\n||======================||\n";
     cout << "Enter amount to top-up (100k, 500k, 1jt, 2jt): ";
     cin >> amount;
     currentUser.balance += amount;
     cout << "Top-up successful. Current balance: " << currentUser.balance << endl;
+    system("pause");
 }
 
 void order() {
@@ -291,12 +358,15 @@ void addService() {
     cin >> newService->price;
     services[serviceCount++] = newService;
     cout << "Service added: " << newService->title << endl;
+    system("pause");
 }
 
 void deleteService() {
+    system("cls");
     displayServices();
     if (serviceCount == 0) {
         cout << "No services available to delete.\n";
+        system("pause");
         return;
     }
     
@@ -306,6 +376,7 @@ void deleteService() {
     
     if (serviceIndex < 1 || serviceIndex > serviceCount) {
         cout << "Invalid service number.\n";
+        system("pause");
         return;
     }
 
@@ -320,6 +391,7 @@ void deleteService() {
     
     if (hasOrders) {
         cout << "Cannot delete service. There are active orders for this service.\n";
+        system("pause");
         return;
     }
 
@@ -331,26 +403,34 @@ void deleteService() {
 
     serviceCount--;
     cout << "Service deleted successfully.\n";
+    system("pause");
 }
 
 void viewProfile() {
-    cout << "Username: " << currentUser.username << "\nBalance: " << currentUser.balance << endl;
+    system("cls");
+    cout <<"||========================||\n||      PROFILE ANDA      ||\n||========================||\n";
+    cout << "Username: " << currentUser.username << "\nBalance: Rp." << currentUser.balance << endl;
+    system("pause");
 }
 
 void displayServices() {
     if (serviceCount == 0) {
         cout << "No services available.\n";
+        system("pause");
         return;
     }
 
     for (int i = 0; i < serviceCount; ++i) {
         cout << i + 1 << ". " << services[i]->title << " - " << services[i]->description << " - " << services[i]->price << endl;
     }
+    system("pause");
 }
 
 void viewOrders() {
+    system("cls");
     if (orderCount == 0) {
         cout << "No orders available.\n";
+        system("pause");
         return;
     }
 
@@ -367,9 +447,11 @@ void viewOrders() {
 }
 
 void cancelOrder() {
+    system("cls");
     viewOrders();
     if (orderCount == 0) {
         cout << "No orders available to cancel.\n";
+        system("pause");
         return;
     }
 
@@ -379,6 +461,7 @@ void cancelOrder() {
 
     if (orderIndex < 1 || orderIndex > orderCount) {
         cout << "Invalid order number.\n";
+        system("pause");
         return;
     }
 
@@ -386,6 +469,7 @@ void cancelOrder() {
 
     if (selectedOrder->isCompleted) {
         cout << "Order is already completed and cannot be canceled.\n";
+        system("pause");
         return;
     }
 
@@ -397,12 +481,16 @@ void cancelOrder() {
     }
 
     cout << "Order canceled successfully. The customer has been refunded.\n";
+    system("pause");
+
 }
 
 void completeOrder() {
+    system("cls");
     viewOrders();
     if (orderCount == 0) {
         cout << "No orders available to complete.\n";
+        system("pause");
         return;
     }
 
@@ -412,6 +500,7 @@ void completeOrder() {
 
     if (orderIndex < 1 || orderIndex > orderCount) {
         cout << "Invalid order number.\n";
+        system("pause");
         return;
     }
 
@@ -419,10 +508,13 @@ void completeOrder() {
 
     if (selectedOrder->isCanceled) {
         cout << "Order is canceled and cannot be completed.\n";
+        system("pause");
         return;
     }
 
     selectedOrder->isCompleted = true;
 
     cout << "Order completed successfully. The customer has been notified.\n";
+
+
 }
