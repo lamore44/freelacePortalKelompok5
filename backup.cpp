@@ -19,6 +19,9 @@ struct Order {
     bool isCanceled;
 };
 
+void banner();
+void firstInterface();
+void secondInterface();
 void menuFreelancer();
 void menuUser();
 void topUp();
@@ -30,7 +33,8 @@ void displayServices();
 void viewOrders();
 void cancelOrder();
 void completeOrder();
-
+void registerUser();
+void login();
 struct User {
     string username;
     string password;
@@ -41,46 +45,116 @@ Service* services[100];
 Order* orders[100];
 int serviceCount = 0;
 int orderCount = 0;
+string username, password;
+int choice;
 
 int main() {
-    string username, password;
-    int choice;
+    firstInterface();
+    return 0;
+}
 
+void firstInterface(){
+    int numItem = 3, selItem = 0;
     while (true) {
-        cout << "1. Register\n2. Login\nChoice: ";
-        cin >> choice;
-        if (choice == 1) {
-            cout << "Enter username: ";
-            cin >> username;
-            cout << "Enter password: ";
-            cin >> password;
-            currentUser = {username, password, 0};
-            cout << "Registration successful.\n";
-        } else if (choice == 2) {
-            cout << "Enter username: ";
-            cin >> username;
-            cout << "Enter password: ";
-            cin >> password;
-            if (username == currentUser.username && password == currentUser.password) {
-                cout << "Login successful.\n";
-                break;
-            } else {
-                cout << "Invalid credentials.\n";
+        system("cls");
+        banner();
+        for(int i = 0; i < numItem; ++i){
+            if(i == selItem){
+                cout << "\033[35m";
+            }else{
+                cout << "\033[0m";
+            }
+            if (i == 0){
+                cout << "||======================||\n||        REGISTER      ||\n||======================||\n";
+            }else if (i == 1){
+                cout << "||======================||\n||         LOGIN        ||\n||======================||\n";
+            }else if (i == 2){
+                cout << "||======================||\n||          EXIT        ||\n||======================||\n";
+            }
+            if (i == numItem-1){
+                cout << "\033[0m";
+            }
+        }
+        int key = getch();
+        if(key == 72){
+            selItem = (selItem + numItem - 1) % numItem;
+        }else if(key == 80){
+            selItem = (selItem + 1) % numItem;
+        }else if(key == 13){
+            if(selItem == numItem-1){
+                return;
+            }else{
+                if(selItem == 0){
+                    registerUser();
+                }else if(selItem == 1){
+                    login();
+                }else if(selItem == 2){
+                    break;
+                }
             }
         }
     }
-
+}
+void secondInterface(){
     while (true) {
-        cout << "1. Freelancer Menu\n2. User Menu\nChoice: ";
+        system("cls");
+        banner();
+        cout << "1. Freelancer Menu\n2. User Menu\n3. Log-out\nChoice: ";
         cin >> choice;
         if (choice == 1) {
             menuFreelancer();
         } else if (choice == 2) {
             menuUser();
+        } else if(choice == 3){
+            firstInterface();
         }
     }
-
-    return 0;
+}
+void registerUser(){
+    system("cls");
+    cout << "||======================||\n||        REGISTER      ||\n||======================||\n";
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+    currentUser = {username, password, 0};
+    cout << "Registration successful.\n";
+    system("pause");
+}
+void login(){
+    system("cls");
+    cout << "||======================||\n||         LOGIN        ||\n||======================||\n";
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+    if (username == currentUser.username && password == currentUser.password) {
+        cout << "Login successful.\n";
+        secondInterface();
+    } else {
+        cout << "Invalid credentials.\n";
+    }
+    system("pause");
+}
+void banner(){
+    cout << R"(
+      ________  _______   _______  ___      ___  __     ______    _______  
+ /"       )/"     "| /"      \|"  \    /"  ||" \   /" _  "\  /"     "| 
+(:   \___/(: ______)|:        |\   \  //  / ||  | (: ( \___)(: ______) 
+ \___  \   \/    |  |_____/   ) \\  \/. ./  |:  |  \/ \      \/    |   
+  __/  \\  // ___)_  //      /   \.    //   |.  |  //  \ _   // ___)_  
+ /" \   :)(:      "||:  __   \    \\   /    /\  |\(:   _) \ (:      "| 
+(_______/  \_______)|__|  \___)    \__/    (__\_|_)\_______) \_______) 
+                                                                       
+      ________  _______    __    __    _______   _______    _______    
+     /"       )|   __ "\  /" |  | "\  /"     "| /"      \  /"     "|   
+    (:   \___/ (. |__) :)(:  (__)  :)(: ______)|:        |(: ______)   
+     \___  \   |:  ____/  \/      \/  \/    |  |_____/   ) \/    |     
+      __/  \\  (|  /      //  __  \\  // ___)_  //      /  // ___)_    
+     /" \   :)/|__/ \    (:  (  )  :)(:      "||:  __   \ (:      "|   
+    (_______/(_______)    \__|  |__/  \_______)|__|  \___) \_______)   
+                                                                       
+    )" << endl;
 }
 
 void menuFreelancer() {
