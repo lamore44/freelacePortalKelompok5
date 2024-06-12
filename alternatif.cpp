@@ -51,7 +51,7 @@ int userCount = 0;
 int serviceCount = 0;
 int orderCount = 0;
 User* currentUser = nullptr;
-string username, password;
+string username, password, serviceName;
 int choice;
 
 int main() {
@@ -371,7 +371,7 @@ void topUp(){
 //     system("cls");
 //     cout << "|+|=============================|+|\n|+|            ORDER            |+|\n|+|=============================|+|\n";
 //     displayServices();
-//     string serviceName;
+//   
 //     cout << "Masukkan nama jasa yang diinginkan: ";
 //     cin.ignore();
 //     getline(cin, serviceName);
@@ -418,7 +418,6 @@ void order(){
     system("cls");
     cout << "|+|=============================|+|\n|+|            ORDER            |+|\n|+|=============================|+|\n";
     displayServices();
-    string serviceName;
     cout << "Masukkan nama jasa yang diinginkan: ";
     cin.ignore();
     getline(cin, serviceName);
@@ -479,9 +478,8 @@ void deleteService(){
     system("cls");
     cout << "|+|=============================|+|\n|+|         DELETE SERVICE       |+|\n|+|=============================|+|\n";
     displayServices();
-    string serviceName;
-    cout << "Masukkan nama jasa yang akan dihapus: ";
     cin.ignore();
+    cout << "Masukkan nama jasa yang akan dihapus: ";
     getline(cin, serviceName);
     for (int i = 0; i < serviceCount; ++i) {
         if (services[i]->title == serviceName && services[i]->provider == currentUser->username) {
@@ -513,7 +511,7 @@ void displayServices(){
     for (int i = 0; i < serviceCount; ++i) {
         cout << "Judul: " << services[i]->title << "\nDeskripsi: " << services[i]->description << "\nHarga: " << services[i]->price << "\nPenyedia: " << services[i]->provider << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<< endl;
     }
-    // system("pause");
+    system("pause");
 }
 
 void viewOrders(){
@@ -532,7 +530,6 @@ void cancelOrder(){
     system("cls");
     cout << "|+|=============================|+|\n|+|          CANCEL ORDER        |+|\n|+|=============================|+|\n";
     viewOrders();
-    string serviceName;
     cout << "Enter service name to cancel order: ";
     cin.ignore();
     getline(cin, serviceName);
@@ -547,13 +544,13 @@ void cancelOrder(){
                     for (int j = 0; j < userCount; ++j) {
                         if (users[j]->username == orders[i]->username) {
                             users[j]->balance += orders[i]->price;
-                            cout << "Order canceled and money refunded to the user successfully.\n";
+                            cout << "Pesanan dibatalkan dan uang telah di-refund kepada user\n";
                             system("pause");
                             return;
                         }
                     }
                 } else {
-                    cout << "Order canceled successfully.\n";
+                    cout << "Pesanan berhasil dibatalkan\n";
                     system("pause");
                     return;
                 }
@@ -568,7 +565,6 @@ void completeOrder() {
     system("cls");
     cout << "|+|=============================|+|\n|+|         COMPLETE ORDER       |+|\n|+|=============================|+|\n";
     viewOrders();
-    string serviceName;
     cout << "Enter service name to complete order: ";
     cin.ignore();
     getline(cin, serviceName);
@@ -585,11 +581,11 @@ void completeOrder() {
                     }
                 }
 
-                cout << "Order completed successfully.\n";
+                cout << "Pesanan telah diselesaikan\n";
                 system("pause");
                 return;
             } else {
-                cout << "Order already completed or canceled.\n";
+                cout << "Pesanan mungkin telah diselesaikan atau telah dibatalkan\n";
                 system("pause");
                 return;
             }
