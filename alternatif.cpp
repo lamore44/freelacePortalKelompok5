@@ -19,6 +19,7 @@ struct Order {
     int price;
     bool isCompleted;
     bool isCanceled;
+    bool isDeleted;
 };
 
 struct User {
@@ -29,7 +30,6 @@ struct User {
 };
 void banner();
 void firstInterface();
-void secondInterface();
 void menuFreelancer();
 void menuUser();
 void topUp();
@@ -51,7 +51,7 @@ int userCount = 0;
 int serviceCount = 0;
 int orderCount = 0;
 User* currentUser = nullptr;
-string username, password, serviceName;
+string username, password;
 int choice;
 
 int main() {
@@ -101,50 +101,6 @@ void firstInterface(){
         }
     }
 }
-
-void secondInterface(){
-    int numItem = 3, selItem = 0;
-    while (true) {
-        system("cls");
-        banner();
-        for(int i = 0; i < numItem; ++i){
-            if(i == selItem){
-                cout << "\033[34m";
-            }else{
-                cout << "\033[0m";
-            }
-            if (i == 0){
-                cout << "||======================||\n||       FREELANCER     ||\n||======================||\n";
-            }else if (i == 1){
-                cout << "||======================||\n||          USER        ||\n||======================||\n";
-            }else if (i == 2){
-                cout << "||======================||\n||         LOG-OUT      ||\n||======================||\n";
-            }
-            if (i == numItem-1){
-                cout << "\033[0m";
-            }
-        }
-        int key = getch();
-        if(key == 72){
-            selItem = (selItem + numItem - 1) % numItem;
-        }else if(key == 80){
-            selItem = (selItem + 1) % numItem;
-        }else if(key == 13){
-            if(selItem == numItem-1){
-                return;
-            }else{
-                if(selItem == 0){
-                    menuFreelancer();
-                }else if(selItem == 1){
-                   menuUser();
-                }else if(selItem == 2){
-                    firstInterface();
-                }
-            }
-        }
-    }
-}
-
 void registerUser(){
     system("cls");
     cout << "||======================||\n||        REGISTER      ||\n||======================||\n";
@@ -153,8 +109,15 @@ void registerUser(){
     cout << "Enter password: ";
     cin >> password;
     char role;
-    cout << "Are you a freelancer? (y/n): ";
-    cin >> role;
+    while (true) {
+        cout << "Are you a freelancer? (y/n): ";
+        cin >> role;
+        if (role == 'y' || role == 'Y' || role == 'n' || role == 'N') {
+            break;
+        } else {
+            cout << "Invalid input. Please enter 'y' or 'n'.\n";
+        }
+    }
 
     for (int i = 0; i < userCount; ++i) {
         if (users[i]->username == username) {
@@ -347,77 +310,11 @@ void topUp(){
     cout << "Top up Berhasil!\nSaldo anda: " << currentUser->balance << endl;
     system("pause");
 }
-
-// void trim(string &str) {
-//     // Trim leading whitespace
-//     size_t start = str.find_first_not_of(" \t\n\r\f\v");
-//     str = (start == string::npos) ? "" : str.substr(start);
-
-//     // Trim trailing whitespace
-//     size_t end = str.find_last_not_of(" \t\n\r\f\v");
-//     str = (end == string::npos) ? "" : str.substr(0, end + 1);
-// }
-
-// string toLower(string str) {
-//     for (size_t i = 0; i < str.size(); ++i) {
-//         if (str[i] >= 'A' && str[i] <= 'Z') {
-//             str[i] += 'a' - 'A';
-//         }
-//     }
-//     return str;
-// }
-
-// void order() {
-//     system("cls");
-//     cout << "|+|=============================|+|\n|+|            ORDER            |+|\n|+|=============================|+|\n";
-//     displayServices();
-//   
-//     cout << "Masukkan nama jasa yang diinginkan: ";
-//     cin.ignore();
-//     getline(cin, serviceName);
-    
-//     // Trim and convert to lowercase
-//     trim(serviceName);
-//     serviceName = toLower(serviceName);
-
-//     for (int i = 0; i < serviceCount; ++i) {
-//         string serviceTitle = services[i]->title;
-//         trim(serviceTitle);
-//         serviceTitle = toLower(serviceTitle);
-
-//         if (serviceTitle == serviceName) {
-//             if (currentUser->balance >= services[i]->price) {
-//                 Order* newOrder = new (nothrow) Order;
-//                 if (!newOrder) {
-//                     cout << "Memory allocation failed.\n";
-//                     system("pause");
-//                     return;
-//                 }
-//                 newOrder->serviceTitle = services[i]->title;
-//                 newOrder->price = services[i]->price;
-//                 newOrder->username = currentUser->username;
-//                 newOrder->provider = services[i]->provider;
-//                 newOrder->isCompleted = false;
-//                 newOrder->isCanceled = false;
-//                 currentUser->balance -= services[i]->price;
-//                 orders[orderCount++] = newOrder;
-//                 cout << "BERHASIL MEMESAN!!\n";
-//                 system("pause");
-//                 return;
-//             } else {
-//                 cout << "Saldo anda tidak mencukupi silahkan top-up terlebih dahulu ^_^.\n";
-//                 system("pause");
-//                 return;
-//             }
-//         }
-//     }
-//     cout << "Service not found.\n";
-//     system("pause");
-// }
 void order(){
     system("cls");
     cout << "|+|=============================|+|\n|+|            ORDER            |+|\n|+|=============================|+|\n";
     displayServices();
+    string serviceName;
     cout << "Masukkan nama jasa yang diinginkan: ";
     cin.ignore();
     getline(cin, serviceName);
@@ -473,16 +370,23 @@ void addService(){
     cout << "Jasa berhasil ditambahkan!\n";
     system("pause");
 }
-
 void deleteService(){
     system("cls");
     cout << "|+|=============================|+|\n|+|         DELETE SERVICE       |+|\n|+|=============================|+|\n";
     displayServices();
-    cin.ignore();
+    string serviceName;
     cout << "Masukkan nama jasa yang akan dihapus: ";
+    cin.ignore();
     getline(cin, serviceName);
     for (int i = 0; i < serviceCount; ++i) {
         if (services[i]->title == serviceName && services[i]->provider == currentUser->username) {
+            // Mark related orders as deleted
+            for (int j = 0; j < orderCount; ++j) {
+                if (orders[j]->serviceTitle == serviceName) {
+                    orders[j]->isDeleted = true;
+                }
+            }
+
             delete services[i];
             for (int j = i; j < serviceCount - 1; ++j) {
                 services[j] = services[j + 1];
@@ -496,6 +400,7 @@ void deleteService(){
     cout << "Jasa tidak ditemukan atau anda bukan penyedia jasa yang dimaksud!\n";
     system("pause");
 }
+
 
 void viewProfile(){
     system("cls");
@@ -525,73 +430,150 @@ void viewOrders(){
     }
     system("pause");
 }
-
-void cancelOrder(){
+void cancelOrder() {
     system("cls");
     cout << "|+|=============================|+|\n|+|          CANCEL ORDER        |+|\n|+|=============================|+|\n";
     viewOrders();
+    string serviceName;
     cout << "Enter service name to cancel order: ";
     cin.ignore();
     getline(cin, serviceName);
-    for (int i = 0; i < orderCount; ++i) {
-        if (orders[i]->serviceTitle == serviceName) {
-            // cek apakah pengguna login sebagai freelancer atau user biasa
-            if (orders[i]->username == currentUser->username || orders[i]->provider == currentUser->username) {
-                orders[i]->isCanceled = true;
 
-                // jika pengguna freelancer maka uang dikembalikan
-                if (orders[i]->provider == currentUser->username) {
-                    for (int j = 0; j < userCount; ++j) {
-                        if (users[j]->username == orders[i]->username) {
-                            users[j]->balance += orders[i]->price;
-                            cout << "Pesanan dibatalkan dan uang telah di-refund kepada user\n";
-                            system("pause");
-                            return;
-                        }
-                    }
-                } else {
-                    cout << "Pesanan berhasil dibatalkan\n";
+    int matchingOrders[100];
+    int matchingCount = 0;
+
+    // Find matching orders
+    for (int i = 0; i < orderCount; ++i) {
+        if (orders[i] != nullptr && orders[i]->serviceTitle == serviceName && !orders[i]->isDeleted) {
+            if (orders[i]->username == currentUser->username || orders[i]->provider == currentUser->username) {
+                matchingOrders[matchingCount++] = i;
+            }
+        }
+    }
+
+    // Check if there are no matching orders
+    if (matchingCount == 0) {
+        cout << "No matching orders found or you don't have permission to cancel any orders.\n";
+        system("pause");
+        return;
+    }
+
+    // Display matching orders
+    cout << "Matching orders:\n";
+    for (int i = 0; i < matchingCount; ++i) {
+        int index = matchingOrders[i];
+        cout << i << ": " << "Order for " << orders[index]->serviceTitle << " by " << orders[index]->username 
+             << ", Price: " << orders[index]->price 
+             << ", Completed: " << (orders[index]->isCompleted ? "Yes" : "No") 
+             << ", Canceled: " << (orders[index]->isCanceled ? "Yes" : "No") << endl;
+    }
+
+    // Prompt for order index
+    cout << "Enter the index of the order to cancel: ";
+    int orderIndex;
+    cin >> orderIndex;
+
+    // Validate order index
+    if (orderIndex < 0 || orderIndex >= matchingCount) {
+        cout << "Invalid index.\n";
+        system("pause");
+        return;
+    }
+
+    int selectedOrder = matchingOrders[orderIndex];
+    if (orders[selectedOrder] == nullptr) {
+        cout << "The order has been deleted and cannot be canceled.\n";
+    } else if (!orders[selectedOrder]->isCompleted && !orders[selectedOrder]->isCanceled) {
+        orders[selectedOrder]->isCanceled = true;
+
+        // If the current user is the provider, refund the customer
+        if (orders[selectedOrder]->provider == currentUser->username) {
+            for (int j = 0; j < userCount; ++j) {
+                if (users[j]->username == orders[selectedOrder]->username) {
+                    users[j]->balance += orders[selectedOrder]->price;
+                    cout << "Order canceled and money refunded to the user successfully.\n";
                     system("pause");
                     return;
                 }
             }
+        } else {
+            cout << "Order canceled successfully.\n";
+            system("pause");
+            return;
         }
+    } else {
+        cout << "Order already completed or canceled.\n";
     }
-    cout << "Order not found or you don't have permission to cancel this order.\n";
+
     system("pause");
 }
-
 void completeOrder() {
     system("cls");
     cout << "|+|=============================|+|\n|+|         COMPLETE ORDER       |+|\n|+|=============================|+|\n";
     viewOrders();
+    string serviceName;
     cout << "Enter service name to complete order: ";
     cin.ignore();
     getline(cin, serviceName);
-    for (int i = 0; i < orderCount; ++i) {
-        if (orders[i]->serviceTitle == serviceName && orders[i]->provider == currentUser->username) {
-            if (!orders[i]->isCompleted && !orders[i]->isCanceled) {
-                orders[i]->isCompleted = true;
-                
-                // Transfer uang ke freelancer
-                for (int j = 0; j < userCount; ++j) {
-                    if (users[j]->username == orders[i]->provider) {
-                        users[j]->balance += orders[i]->price;
-                        break;
-                    }
-                }
 
-                cout << "Pesanan telah diselesaikan\n";
-                system("pause");
-                return;
-            } else {
-                cout << "Pesanan mungkin telah diselesaikan atau telah dibatalkan\n";
-                system("pause");
-                return;
-            }
+    int matchingOrders[100];
+    int matchingCount = 0;
+
+    // Find matching orders
+    for (int i = 0; i < orderCount; ++i) {
+        // Assuming deleted orders are set to null or handled by a specific flag.
+        if (orders[i] != nullptr && orders[i]->serviceTitle == serviceName && orders[i]->provider == currentUser->username && !orders[i]->isDeleted) {
+            matchingOrders[matchingCount++] = i;
         }
     }
-    cout << "Order not found.\n";
+
+    // Check if there are no matching orders
+    if (matchingCount == 0) {
+        cout << "No matching orders found.\n";
+        system("pause");
+        return;
+    }
+
+    // Display matching orders
+    cout << "Matching orders:\n";
+    for (int i = 0; i < matchingCount; ++i) {
+        int index = matchingOrders[i];
+        cout << i << ": " << "Order for " << orders[index]->serviceTitle << " by " << orders[index]->username 
+             << ", Price: " << orders[index]->price 
+             << ", Completed: " << (orders[index]->isCompleted ? "Yes" : "No") 
+             << ", Canceled: " << (orders[index]->isCanceled ? "Yes" : "No") << endl;
+    }
+
+    // Prompt for order index
+    cout << "Enter the index of the order to complete: ";
+    int orderIndex;
+    cin >> orderIndex;
+
+    // Validate order index
+    if (orderIndex < 0 || orderIndex >= matchingCount) {
+        cout << "Invalid index.\n";
+        system("pause");
+        return;
+    }
+
+    int selectedOrder = matchingOrders[orderIndex];
+    if (orders[selectedOrder] == nullptr) {
+        cout << "The order has been deleted and cannot be completed.\n";
+    } else if (!orders[selectedOrder]->isCompleted && !orders[selectedOrder]->isCanceled) {
+        orders[selectedOrder]->isCompleted = true;
+        
+        // Transfer money to freelancer
+        for (int j = 0; j < userCount; ++j) {
+            if (users[j]->username == orders[selectedOrder]->provider) {
+                users[j]->balance += orders[selectedOrder]->price;
+                break;
+            }
+        }
+
+        cout << "Order completed successfully.\n";
+    } else {
+        cout << "Order already completed or canceled.\n";
+    }
+
     system("pause");
 }
-
