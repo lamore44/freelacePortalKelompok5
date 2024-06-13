@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <conio.h>
-#include <iomanip>
 using namespace std;
 
 struct Service {
@@ -171,7 +170,7 @@ void login(){
 
 void banner(){
     cout << R"(
-      ________  _______   _______  ___      ___  __     ______    _______  
+  ________  _______   _______  ___      ___  __     ______    _______  
  /"       )/"     "| /"      \|"  \    /"  ||" \   /" _  "\  /"     "| 
 (:   \___/(: ______)|:        |\   \  //  / ||  | (: ( \___)(: ______) 
  \___  \   \/    |  |_____/   ) \\  \/. ./  |:  |  \/ \      \/    |   
@@ -543,25 +542,21 @@ void completeOrder() {
              << ", Completed: " << (orders[index]->isCompleted ? "Yes" : "No") 
              << ", Canceled: " << (orders[index]->isCanceled ? "Yes" : "No") << endl;
     }
-
     // Prompt for order index
     cout << "Enter the index of the order to complete: ";
     int orderIndex;
     cin >> orderIndex;
-
     // Validate order index
     if (orderIndex < 0 || orderIndex >= matchingCount) {
         cout << "Invalid index.\n";
         system("pause");
         return;
     }
-
     int selectedOrder = matchingOrders[orderIndex];
     if (orders[selectedOrder] == nullptr) {
         cout << "The order has been deleted and cannot be completed.\n";
     } else if (!orders[selectedOrder]->isCompleted && !orders[selectedOrder]->isCanceled) {
         orders[selectedOrder]->isCompleted = true;
-        
         // Transfer money to freelancer
         for (int j = 0; j < userCount; ++j) {
             if (users[j]->username == orders[selectedOrder]->provider) {
@@ -569,11 +564,9 @@ void completeOrder() {
                 break;
             }
         }
-
         cout << "Order completed successfully.\n";
     } else {
         cout << "Order already completed or canceled.\n";
     }
-
     system("pause");
 }
